@@ -1,4 +1,5 @@
 This repository contains our Arduino and react_app files used for our semester 2 IOE Project.
+As we had a few issues with uploading our Arduino Code in an .ino file, please copy and page the arduino code available on this repository into the Arduino Editor.
 
 
 
