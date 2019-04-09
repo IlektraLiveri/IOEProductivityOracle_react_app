@@ -99,8 +99,6 @@ void loop()
   val = atoi(tempNum); /// converts string to integer, which removes 0
   Serial.println(val);
 
-  // matrix stuff here
-
 matrix.setCursor(0,0);
       matrix.print(val);// Appends the date value here.
        matrix.writeDisplay(); // Displays the number on the Matrix
@@ -108,7 +106,7 @@ matrix.setCursor(0,0);
 
   
   
-  // assign to ledVals here
+  // assigns to ledVals here
   ledVals[id] = val;
   
   // clear array and string
