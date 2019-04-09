@@ -1,0 +1,123 @@
+/*
+  PubNub sample subscribe client
+
+  This sample client will subscribe to and handle raw PubNub messages
+  (not doing any JSON decoding).  It does so with a randomly generated
+  UUID.
+
+  Circuit:
+  * Ethernet shield attached to pins 10, 11, 12, 13
+  * (Optional.) LED on pin 8 for reception indication.
+  * Pin A4 unconnected (noise source for random number generator)
+
+  created 23 October 2012
+  by Petr Baudis
+
+  https://github.com/pubnub/pubnub-api/tree/master/arduino
+  This code is in the public domain.  
+  */
+
+#include <SPI.h>
+#include <Ethernet.h>
+#include <PubNub.h> //Library to connect to PubNub
+#include <Wire.h>
+#include <Adafruit_GFX.h>// Library to work the led Matrix
+#include "Adafruit_LEDBackpack.h"// Library to work the led Matrix
+
+
+Adafruit_8x8matrix matrix = Adafruit_8x8matrix();
+
+
+// Some Ethernet shields have a MAC address printed on a sticker on the shield;
+// fill in that address here, or choose your own at random:
+byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xE0 };//Mac Adress
+
+
+String inString = "";
+char tempNum[2];
+int numLength; 
+int val;
+int id;
+long ledVals[] = {0,0,0};
+
+/*
+ This allows us to connect to our Pubnub channel.
+ */
+char pubkey[] = "pub-c-7c0e82a5-cb64-40d5-b0b2-48b8ed7be389";
+char subkey[] = "sub-c-6eeb1f86-ed7d-11e8-b4b3-36001c7c3431";
+char channel[] = "IOT";
+char uuid[] = "sec-c-NGU1YzcyNjktZjM2Ny00MGUzLTgyZTEtNjgxNjAxODUyMDkz";
+
+
+void setup()
+{
+	Serial.begin(9600);
+	Serial.println("Serial set up");
+
+  matrix.begin(0x70);  // pass in the address
+
+	while (!Ethernet.begin(mac)) {
+		Serial.println("Ethernet setup error");
+		delay(1000);
+	}
+	Serial.println("Ethernet set up");
+
+	PubNub.begin(pubkey, subkey);
+	PubNub.set_uuid(uuid);
+	Serial.println("PubNub set up");
+}
+
+     
+void loop()
+{
+	Ethernet.maintain();
+
+	PubSubClient *client;
+
+	Serial.println("waiting for a message (subscribe)");// Checks that the arduino is connected to PubNub
+	client = PubNub.subscribe(channel);
+	if (!client) {
+		Serial.println("subscription error");// Will print error if not working
+		delay(1000);
+		return;
+	}
+	Serial.println("Received: ");
+	while (client->wait_for_data()) {
+		char inChar = client->read();
+     inString += inChar;   
+   }
+  client->stop();
+
+  Serial.println(inString);
+
+  tempNum[0] = inString[2];// this object only calls the 3rd and the 4th array object.This allows for only the number to display, without the square brackets or speech marks which appear around the number in the serial port. 
+  tempNum[1] = inString[3];
+  Serial.println(tempNum);
+
+
+
+  val = atoi(tempNum); /// converts string to integer, which removes 0
+  Serial.println(val);
+
+  // matrix stuff here
+
+matrix.setCursor(0,0);
+      matrix.print(val);// Appends the date value here.
+       matrix.writeDisplay(); // Displays the number on the Matrix
+       matrix.clear();
+
+  
+  
+  // assign to ledVals here
+  ledVals[id] = val;
+  
+  // clear array and string
+  for(int j = 0; j < sizeof(tempNum); j++) {
+    tempNum[j] = (char)0;
+  }
+  inString = "";
+  delay(500);
+
+  
+
+}
